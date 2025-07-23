@@ -1,0 +1,93 @@
+/* Main Styling for SimpleEats */
+
+/* Global styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make footer stick to bottom */
+footer {
+    margin-top: auto;
+}
+
+/* Navbar customization */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Cards styling */
+.card {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* Restaurant and menu cards */
+.restaurant-card, .menu-item-card {
+    transition: transform 0.3s;
+}
+
+.restaurant-card:hover, .menu-item-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Tables styling */
+.table th {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Forms styling */
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Badge styling */
+.badge {
+    font-weight: normal;
+    padding: 0.4em 0.7em;
+}
+
+/* Admin dashboard stats */
+.card .display-4 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card .display-4 {
+        font-size: 2rem;
+    }
+    
+    .jumbotron h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Jumbotron styling (Bootstrap 5 doesn't have jumbotron) */
+.jumbotron {
+    border-radius: 0.3rem;
+}
+
+/* Order status colors */
+.status-pending {
+    color: #ffc107;
+}
+
+.status-completed {
+    color: #28a745;
+}
+
+/* Cart quantity input */
+.quantity-input {
+    width: 60px;
+}

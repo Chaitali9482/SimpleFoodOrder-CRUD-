@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section rounded">
+    <div class="container text-center py-5">
+        <h1 class="display-4 fw-bold">Delicious Food Delivered</h1>
+        <p class="lead">Order from your favorite restaurants and enjoy your meal at home.</p>
+        <a href="{{ url_for('restaurants') }}" class="btn btn-primary btn-lg mt-3">
+            <i class="fas fa-utensils me-2"></i> Browse Restaurants
+        </a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-store text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h4>Choose a Restaurant</h4>
+                <p class="text-muted">
+                    Browse our selection of the best restaurants in your area.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-hamburger text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h4>Select Your Meal</h4>
+                <p class="text-muted">
+                    Discover delicious dishes from your favorite restaurant's menu.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h4>Checkout & Enjoy</h4>
+                <p class="text-muted">
+                    Place your order and enjoy your delicious meal at home.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Restaurants -->
+<h2 class="mt-5 mb-4">Featured Restaurants</h2>
+
+{% if featured_restaurants|length > 0 %}
+    <div class="row">
+        {% for restaurant in featured_restaurants %}
+            <div class="col-md-4 mb-4">
+                <div class="card restaurant-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ restaurant.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ restaurant.location }}</h6>
+                        <p class="card-text">{{ restaurant.menus|length }} items on menu</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <a href="{{ url_for('menu', restaurant_id=restaurant.id) }}" class="btn btn-primary w-100">
+                            <i class="fas fa-utensils me-2"></i> View Menu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-3">
+        <a href="{{ url_for('restaurants') }}" class="btn btn-outline-primary">
+            <i class="fas fa-list me-2"></i> View All Restaurants
+        </a>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <p>No restaurants available at the moment. Please check back later.</p>
+    </div>
+{% endif %}
+{% endblock %}

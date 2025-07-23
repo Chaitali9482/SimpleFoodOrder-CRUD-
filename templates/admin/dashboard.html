@@ -1,0 +1,134 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<!-- Admin Dashboard -->
+<h1 class="mb-4">Admin Dashboard</h1>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Restaurants</h5>
+                <p class="card-text display-4">{{ restaurant_count }}</p>
+                <a href="{{ url_for('admin_restaurants') }}" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Menu Items</h5>
+                <p class="card-text display-4">{{ menu_count }}</p>
+                <a href="{{ url_for('admin_menus') }}" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Customers</h5>
+                <p class="card-text display-4">{{ customer_count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="card-text display-4">{{ order_count }}</p>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Orders Alert -->
+{% if pending_count > 0 %}
+    <div class="alert alert-warning">
+        <h5><i class="fas fa-exclamation-triangle"></i> You have {{ pending_count }} pending orders!</h5>
+        <p class="mb-0">These orders are waiting for processing. <a href="{{ url_for('admin_orders') }}?status=Pending" class="alert-link">View Orders</a></p>
+    </div>
+{% endif %}
+
+<!-- Recent Orders -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Recent Orders</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_orders|length == 0 %}
+            <div class="alert alert-info">No orders found.</div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Restaurant</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order_data in recent_orders %}
+                            <tr>
+                                <td>#{{ order_data[0].id }}</td>
+                                <td>{{ order_data.customer_name }}</td>
+                                <td>{{ order_data.restaurant_name }}</td>
+                                <td>{{ order_data[0].order_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                                <td>
+                                    <span class="badge {{ 'bg-success' if order_data[0].status == 'Completed' else 'bg-warning' }}">
+                                        {{ order_data[0].status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin_orders') }}?view={{ order_data[0].id }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        
+        <div class="mt-3">
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-primary">View All Orders</a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access Buttons -->
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="d-grid">
+            <a href="{{ url_for('admin_restaurants') }}" class="btn btn-lg btn-outline-primary">
+                <i class="fas fa-store"></i> Manage Restaurants
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="d-grid">
+            <a href="{{ url_for('admin_menus') }}" class="btn btn-lg btn-outline-success">
+                <i class="fas fa-utensils"></i> Manage Menu Items
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="d-grid">
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-lg btn-outline-warning">
+                <i class="fas fa-list-alt"></i> Manage Orders
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

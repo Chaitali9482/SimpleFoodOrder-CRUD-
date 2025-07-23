@@ -1,0 +1,128 @@
+Product Name: SimpleEats - Online Food Ordering System
+
+Overview
+SimpleEats is a basic web-based food ordering system designed to simulate a restaurant menu ordering experience. The application allows customers to view restaurant menus, place orders, and review their order history. Admin users can manage restaurants, menus, and order records with full CRUD (Create, Read, Update, Delete) functionality.
+
+Objectives
+Provide a functional and intuitive interface for ordering food.
+
+Allow administrators to manage restaurant details, menus, and customer orders.
+
+Showcase real-time updates to current and past orders.
+
+Connect PHP and MySQL for full backend integration.
+
+Key Features
+1. Core System Features
+Restaurants Management: Add, view, update, and delete restaurants.
+
+Menu Management: Link menus to restaurants; manage menu items (name, price, description).
+
+Customer Panel: View available restaurants and their menu items.
+
+Ordering System: Customers can place orders and view their current and previous orders.
+
+Order Tracking: Simple current and completed order view.
+
+2. Admin Panel
+Add, update, delete restaurants.
+
+Add, update, delete menu items.
+
+View and delete orders.
+
+View customer list (if implemented).
+
+Technical Requirements
+Frontend
+HTML for structure.
+
+CSS for basic styling (no animations).
+
+Forms for input (add/update/delete).
+
+Backend
+PHP for server-side scripting (CRUD operations).
+
+MySQL as the database system.
+
+Use mysqli or PDO to connect to the database.
+
+Replit-compatible deployment.
+
+Database Structure (MySQL)
+sql
+Copy
+Edit
+CREATE TABLE restaurants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    location VARCHAR(255)
+);
+
+CREATE TABLE menus (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    restaurant_id INT,
+    item_name VARCHAR(255),
+    price DECIMAL(10,2),
+    description TEXT,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+);
+
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255)
+);
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    restaurant_id INT,
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Completed') DEFAULT 'Pending',
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+);
+
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    menu_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (menu_id) REFERENCES menus(id)
+);
+APIs and Integrations
+No external APIs.
+
+Local MySQL connection via PHP.
+
+Performance
+Fast load times (only basic form processing).
+
+No page reload prevention required.
+
+Security
+Input validation on all forms.
+
+Use mysqli_real_escape_string() or PDO prepared statements to prevent SQL Injection.
+
+Minimal session management for admin access.
+
+Roadmap
+Phase 1 - MVP (0–2 weeks)
+Customer UI to browse restaurants and menus.
+
+Place orders.
+
+Admin UI for full CRUD on restaurants, menus, and orders.
+
+Display current and previous orders.
+
+Phase 2 - Optional Add-ons (2–4 weeks)
+Login/Registration system.
+
+Category filtering.
+
+Order status updates (from Pending to Completed).

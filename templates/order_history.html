@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Order History Page -->
+<div class="mb-4">
+    <h1>Order History</h1>
+    <p class="lead">View your past and current orders</p>
+</div>
+
+<!-- Email Verification Form -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Verify Your Email</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="form-text">Enter the email you used when placing orders.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Find My Orders
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders List -->
+{% if email_submitted %}
+    {% if orders|length > 0 %}
+        <h3 class="mb-3">Your Orders</h3>
+        
+        <div class="row">
+            {% for order in orders %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header {{ 'bg-success' if order.status == 'Completed' else 'bg-warning' }} text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Order #{{ order.id }}</h5>
+                                <span class="badge bg-light text-dark">
+                                    {{ order.status }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>Restaurant:</strong> {{ order.restaurant.name }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Location:</strong> {{ order.restaurant.location }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Date:</strong> {{ order.order_date.strftime('%B %d, %Y, %I:%M %p') }}
+                            </p>
+                            
+                            <h6 class="mt-4 mb-2">Order Items:</h6>
+                            <div class="list-group mb-3">
+                                {% set total = 0 %}
+                                {% for item in order.items %}
+                                    {% set menu_item = item.menu %}
+                                    {% set subtotal = menu_item.price * item.quantity %}
+                                    {% set total = total + subtotal %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-0">{{ menu_item.item_name }}</h6>
+                                                <small>{{ item.quantity }} x ${{ "%.2f" | format(menu_item.price) }}</small>
+                                            </div>
+                                            <span class="text-primary">${{ "%.2f" | format(subtotal) }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <strong>Total:</strong>
+                                <strong class="text-primary">${{ "%.2f" | format(total) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No orders found for this email address. Try placing an order from our restaurants.
+        </div>
+        <p>
+            <a href="{{ url_for('restaurants') }}" class="btn btn-primary">Browse Restaurants</a>
+        </p>
+    {% endif %}
+{% endif %}
+{% endblock %}

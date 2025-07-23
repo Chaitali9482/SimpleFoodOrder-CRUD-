@@ -1,0 +1,174 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<!-- Menus Management Page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Menu Items</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<!-- Restaurant Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row align-items-end">
+            <div class="col-md-6">
+                <label for="restaurant_filter" class="form-label">Filter by Restaurant</label>
+                <select class="form-select" id="restaurant_filter" name="restaurant_id">
+                    <option value="">All Restaurants</option>
+                    {% for restaurant in restaurants %}
+                        <option value="{{ restaurant.id }}" {{ 'selected' if filter_restaurant_id == restaurant.id else '' }}>
+                            {{ restaurant.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="{{ url_for('admin_menus') }}" class="btn btn-secondary">
+                        <i class="fas fa-sync"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Menu Item Form -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ "Edit" if menu_to_edit else "Add" }} Menu Item</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% if menu_to_edit %}
+                        <input type="hidden" name="id" value="{{ menu_to_edit.id }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="restaurant_id" class="form-label">Restaurant</label>
+                        <select class="form-select" id="restaurant_id" name="restaurant_id" required>
+                            <option value="">Select Restaurant</option>
+                            {% for restaurant in restaurants %}
+                                <option value="{{ restaurant.id }}" {{ 'selected' if (menu_to_edit and menu_to_edit.restaurant_id == restaurant.id) or (not menu_to_edit and filter_restaurant_id == restaurant.id) else '' }}>
+                                    {{ restaurant.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="item_name" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="item_name" name="item_name" value="{{ menu_to_edit.item_name if menu_to_edit else '' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="price" name="price" value="{{ menu_to_edit.price if menu_to_edit else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ menu_to_edit.description if menu_to_edit else '' }}</textarea>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" name="save_menu" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ "Update" if menu_to_edit else "Add" }} Menu Item
+                        </button>
+                    </div>
+                    
+                    {% if menu_to_edit %}
+                        <div class="d-grid mt-2">
+                            <a href="{{ url_for('admin_menus') }}{{ '?restaurant_id=' + filter_restaurant_id|string if filter_restaurant_id else '' }}" class="btn btn-secondary">
+                                <i class="fas fa-plus"></i> Add New Menu Item
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu Items List -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Menu Items</h5>
+            </div>
+            <div class="card-body">
+                {% if menu_items|length == 0 %}
+                    <div class="alert alert-info">No menu items found. Add a menu item using the form.</div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Restaurant</th>
+                                    <th>Item Name</th>
+                                    <th>Price</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in menu_items %}
+                                    <tr>
+                                        <td>{{ item.id }}</td>
+                                        <td>{{ item.restaurant.name }}</td>
+                                        <td>{{ item.item_name }}</td>
+                                        <td>${{ "%.2f" | format(item.price) }}</td>
+                                        <td>{{ item.description[:50] }}{{ '...' if item.description|length > 50 else '' }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_menus') }}?edit={{ item.id }}{{ '&restaurant_id=' + filter_restaurant_id|string if filter_restaurant_id else '' }}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if item.order_items|length == 0 %}
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete the menu item "{{ item.item_name }}"?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form method="post">
+                                                        <input type="hidden" name="id" value="{{ item.id }}">
+                                                        <button type="submit" name="delete_menu" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

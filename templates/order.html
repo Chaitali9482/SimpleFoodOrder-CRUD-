@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Order Page -->
+<div class="mb-4">
+    <h1>Order from {{ restaurant.name }}</h1>
+    <p class="lead">
+        <i class="fas fa-map-marker-alt"></i> 
+        {{ restaurant.location }}
+    </p>
+</div>
+
+<div class="row">
+    <!-- Menu Items -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Menu Items</h5>
+            </div>
+            <div class="card-body">
+                {% if menu_items|length == 0 %}
+                    <div class="alert alert-info">
+                        No menu items available for this restaurant.
+                    </div>
+                {% else %}
+                    <div class="list-group">
+                        {% for item in menu_items %}
+                            <div class="list-group-item">
+                                <form method="post" class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-0">{{ item.item_name }}</h6>
+                                        <small class="text-muted">{{ item.description }}</small>
+                                        <p class="mb-0 text-primary">₹{{ item.price }}</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Qty</span>
+                                            <input type="number" name="quantity" class="form-control" min="1" value="1">
+                                            <input type="hidden" name="menu_id" value="{{ item.id }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <button type="submit" name="add_to_cart" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Your Order</h5>
+            </div>
+            <div class="card-body">
+                {% if cart_items|length == 0 %}
+                    <div class="alert alert-info">
+                        Your cart is empty. Add items from the menu.
+                    </div>
+                {% else %}
+                    <div class="list-group mb-3">
+                        {% set total = 0 %}
+                        {% for item in cart_items %}
+                            {% set subtotal = item.price * item.quantity %}
+                            {% set total = total + subtotal %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ item.name }}</h6>
+                                        <small>{{ item.quantity }} x ₹{{ item.price }}</small>
+                                    </div>
+                                    <div>
+                                        <span class="text-primary me-2">₹{{ subtotal }}</span>
+                                        <a href="{{ url_for('remove_item', restaurant_id=restaurant.id, item_index=loop.index0) }}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong class="text-primary">₹{{ total }}</strong>
+                    </div>
+                    
+                    <a href="{{ url_for('checkout', restaurant_id=restaurant.id) }}" class="btn btn-success w-100">
+                        <i class="fas fa-check"></i> Proceed to Checkout
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <a href="{{ url_for('menu', restaurant_id=restaurant.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Menu
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

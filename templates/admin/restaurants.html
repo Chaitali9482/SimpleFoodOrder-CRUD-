@@ -1,0 +1,129 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<!-- Restaurants Management Page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Restaurants</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <!-- Restaurant Form -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ "Edit" if restaurant_to_edit else "Add" }} Restaurant</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% if restaurant_to_edit %}
+                        <input type="hidden" name="id" value="{{ restaurant_to_edit.id }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Restaurant Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ restaurant_to_edit.name if restaurant_to_edit else '' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" value="{{ restaurant_to_edit.location if restaurant_to_edit else '' }}" required>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" name="save_restaurant" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ "Update" if restaurant_to_edit else "Add" }} Restaurant
+                        </button>
+                    </div>
+                    
+                    {% if restaurant_to_edit %}
+                        <div class="d-grid mt-2">
+                            <a href="{{ url_for('admin_restaurants') }}" class="btn btn-secondary">
+                                <i class="fas fa-plus"></i> Add New Restaurant
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Restaurants List -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">All Restaurants</h5>
+            </div>
+            <div class="card-body">
+                {% if restaurants|length == 0 %}
+                    <div class="alert alert-info">No restaurants found. Add a restaurant using the form.</div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Location</th>
+                                    <th>Menu Items</th>
+                                    <th>Orders</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for restaurant in restaurants %}
+                                    <tr>
+                                        <td>{{ restaurant.id }}</td>
+                                        <td>{{ restaurant.name }}</td>
+                                        <td>{{ restaurant.location }}</td>
+                                        <td>{{ restaurant.menus|length }}</td>
+                                        <td>{{ restaurant.orders|length }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_restaurants') }}?edit={{ restaurant.id }}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin_menus') }}?restaurant_id={{ restaurant.id }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-utensils"></i>
+                                            </a>
+                                            {% if restaurant.orders|length == 0 %}
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ restaurant.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" id="deleteModal{{ restaurant.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ restaurant.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel{{ restaurant.id }}">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete the restaurant "{{ restaurant.name }}"?</p>
+                                                    <p class="text-danger">This will also delete all menu items associated with this restaurant.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form method="post">
+                                                        <input type="hidden" name="id" value="{{ restaurant.id }}">
+                                                        <button type="submit" name="delete_restaurant" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

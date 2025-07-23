@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Order Confirmation Page -->
+<div class="text-center mb-5">
+    <div class="display-1 text-success mb-4">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <h1 class="mb-3">Order Confirmed!</h1>
+    <p class="lead">Thank you for your order, {{ customer_name }}.</p>
+    <p>Your order has been received and is being processed.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order #{{ order_id }} Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Restaurant Information</h6>
+                        <p>
+                            <strong>Name:</strong> {{ restaurant.name }}<br>
+                            <strong>Location:</strong> {{ restaurant.location }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Order Information</h6>
+                        <p>
+                            <strong>Order Date:</strong> {{ order_date.strftime('%B %d, %Y, %I:%M %p') }}<br>
+                            <strong>Status:</strong> <span class="badge bg-warning">Pending</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <h6 class="mt-4">Order Items</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total = 0 %}
+                            {% for cart_item in cart %}
+                                {% set subtotal = cart_item.menu.price * cart_item.quantity %}
+                                {% set total = total + subtotal %}
+                                <tr>
+                                    <td>{{ cart_item.menu.item_name }}</td>
+                                    <td>₹{{ cart_item.menu.price }}</td>
+                                    <td>{{ cart_item.quantity }}</td>
+                                    <td>₹{{ subtotal|int }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th>₹{{ total|int }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    A confirmation email has been sent to <strong>{{ customer_email }}</strong>.
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                <i class="fas fa-home me-2"></i> Return to Home
+            </a>
+            <a href="{{ url_for('order_history') }}" class="btn btn-outline-primary">
+                <i class="fas fa-history me-2"></i> View Order History
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

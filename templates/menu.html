@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Restaurant Menu Page -->
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>{{ restaurant.name }}</h1>
+            <p class="lead">
+                <i class="fas fa-map-marker-alt"></i> {{ restaurant.location }}
+            </p>
+        </div>
+        <a href="{{ url_for('restaurants') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Restaurants
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Menu Items -->
+    <div class="col-md-8">
+        {% if menu_items|length > 0 %}
+            <h2>Menu Items</h2>
+            <div class="row">
+                {% for item in menu_items %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card menu-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.item_name }}</h5>
+                                <h6 class="card-subtitle mb-2 text-primary">₹{{ item.price }}</h6>
+                                <p class="card-text">{{ item.description if item.description else 'No description available.' }}</p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <form method="post" action="{{ url_for('order', restaurant_id=restaurant.id) }}">
+                                    <input type="hidden" name="menu_id" value="{{ item.id }}">
+                                    <div class="d-flex">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Qty</span>
+                                            <select class="form-select" name="quantity">
+                                                {% for i in range(1, 11) %}
+                                                    <option value="{{ i }}">{{ i }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button type="submit" name="add_to_cart" class="btn btn-primary ms-2 w-100">
+                                            <i class="fas fa-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p>No menu items available for this restaurant.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Order Summary -->
+    <div class="col-md-4">
+        <div class="card sticky-top" style="top: 20px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Your Order</h5>
+            </div>
+            <div class="card-body">
+                {% if cart|length > 0 %}
+                    {% set total = 0 %}
+                    {% for cart_item in cart %}
+                        {% set subtotal = cart_item.menu.price * cart_item.quantity %}
+                        {% set total = total + subtotal %}
+                        <div class="cart-item d-flex justify-content-between align-items-center mb-3 p-2 rounded">
+                            <div>
+                                <h6 class="mb-0">{{ cart_item.menu.item_name }}</h6>
+                                <small>₹{{ cart_item.menu.price }} x {{ cart_item.quantity }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="text-primary fw-bold">₹{{ subtotal|int }}</span>
+                                <a href="{{ url_for('remove_item', restaurant_id=restaurant.id, item_index=loop.index0) }}" class="btn btn-sm btn-outline-danger ms-2">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold">Total:</span>
+                        <span class="fw-bold text-primary">₹{{ total|int }}</span>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{{ url_for('checkout', restaurant_id=restaurant.id) }}" class="btn btn-success">
+                            <i class="fas fa-shopping-cart me-2"></i> Proceed to Checkout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-shopping-cart mb-3" style="font-size: 3rem; color: #dee2e6;"></i>
+                        <p>Your cart is empty</p>
+                        <p class="text-muted small">Add items from the menu to begin your order</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

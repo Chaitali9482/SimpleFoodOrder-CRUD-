@@ -1,0 +1,240 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<!-- Orders Management Page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Orders</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+{% if view_order %}
+    <!-- Order Details View -->
+    <div class="card mb-4">
+        <div class="card-header {{ 'bg-success' if view_order.status == 'Completed' else 'bg-warning' }} text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Order #{{ view_order.id }} Details</h5>
+                <span class="badge bg-light text-dark">{{ view_order.status }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Customer Information</h6>
+                    <p>
+                        <strong>Name:</strong> {{ view_order.customer.name }}<br>
+                        <strong>Email:</strong> {{ view_order.customer.email }}
+                    </p>
+                    
+                    <h6 class="mt-4">Order Information</h6>
+                    <p>
+                        <strong>Date:</strong> {{ view_order.order_date.strftime('%B %d, %Y, %I:%M %p') }}<br>
+                        <strong>Status:</strong> {{ view_order.status }}
+                    </p>
+                    
+                    <!-- Status Update Form -->
+                    <form method="post" class="mb-3">
+                        <input type="hidden" name="order_id" value="{{ view_order.id }}">
+                        <div class="input-group">
+                            <select class="form-select" name="status">
+                                <option value="Pending" {{ 'selected' if view_order.status == 'Pending' else '' }}>Pending</option>
+                                <option value="Completed" {{ 'selected' if view_order.status == 'Completed' else '' }}>Completed</option>
+                            </select>
+                            <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6>Restaurant Information</h6>
+                    <p>
+                        <strong>Name:</strong> {{ view_order.restaurant_obj.name }}<br>
+                        <strong>Location:</strong> {{ view_order.restaurant_obj.location }}
+                    </p>
+                </div>
+            </div>
+            
+            <h6 class="mt-4">Order Items</h6>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total = 0 %}
+                        {% for order_item in order_items %}
+                            {% set item = order_item[0] %}
+                            {% set subtotal = order_item[2] * item.quantity %}
+                            {% set total = total + subtotal %}
+                            <tr>
+                                <td>{{ order_item[1] }}</td>
+                                <td>${{ "%.2f" | format(order_item[2]) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ "%.2f" | format(subtotal) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total:</th>
+                            <th>${{ "%.2f" | format(total) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="mt-3">
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
+                    <i class="fas fa-trash"></i> Delete Order
+                </button>
+            </div>
+            
+            <!-- Delete Order Modal -->
+            <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteOrderModalLabel">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete Order #{{ view_order.id }}?</p>
+                            <p class="text-danger">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form method="post">
+                                <input type="hidden" name="order_id" value="{{ view_order.id }}">
+                                <button type="submit" name="delete_order" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Orders List View -->
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row align-items-end">
+                <div class="col-md-5">
+                    <label for="status_filter" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="status_filter" name="status" data-auto-submit>
+                        <option value="All" {{ 'selected' if status_filter == 'All' else '' }}>All Orders</option>
+                        <option value="Pending" {{ 'selected' if status_filter == 'Pending' else '' }}>Pending Orders</option>
+                        <option value="Completed" {{ 'selected' if status_filter == 'Completed' else '' }}>Completed Orders</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="restaurant_filter" class="form-label">Filter by Restaurant</label>
+                    <select class="form-select" id="restaurant_filter" name="restaurant_id" data-auto-submit>
+                        <option value="">All Restaurants</option>
+                        {% for restaurant in restaurants %}
+                            <option value="{{ restaurant.id }}" {{ 'selected' if restaurant_filter == restaurant.id else '' }}>
+                                {{ restaurant.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Orders</h5>
+        </div>
+        <div class="card-body">
+            {% if orders|length == 0 %}
+                <div class="alert alert-info">No orders found matching your criteria.</div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Restaurant</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order_data in orders %}
+                                <tr>
+                                    <td>#{{ order_data[0].id }}</td>
+                                    <td>
+                                        {{ order_data.customer_name }}<br>
+                                        <small class="text-muted">{{ order_data.customer_email }}</small>
+                                    </td>
+                                    <td>{{ order_data.restaurant_name }}</td>
+                                    <td>{{ order_data[0].order_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                                    <td>
+                                        <span class="badge {{ 'bg-success' if order_data[0].status == 'Completed' else 'bg-warning' }}">
+                                            {{ order_data[0].status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin_orders') }}?view={{ order_data[0].id }}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal{{ order_data[0].id }}">
+                                            <i class="fas fa-edit"></i> Status
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Status Update Modal -->
+                                <div class="modal fade" id="statusModal{{ order_data[0].id }}" tabindex="-1" aria-labelledby="statusModalLabel{{ order_data[0].id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="statusModalLabel{{ order_data[0].id }}">Update Order Status</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="post">
+                                                    <input type="hidden" name="order_id" value="{{ order_data[0].id }}">
+                                                    <div class="mb-3">
+                                                        <label for="status{{ order_data[0].id }}" class="form-label">Status</label>
+                                                        <select class="form-select" id="status{{ order_data[0].id }}" name="status">
+                                                            <option value="Pending" {{ 'selected' if order_data[0].status == 'Pending' else '' }}>Pending</option>
+                                                            <option value="Completed" {{ 'selected' if order_data[0].status == 'Completed' else '' }}>Completed</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
