@@ -6,6 +6,8 @@ A modern, responsive food ordering web app where users can browse restaurants, v
 
 <img width="1915" height="948" alt="Screenshot 2025-07-23 231136" src="https://github.com/user-attachments/assets/0bb509ac-1a8d-4292-84dd-e95f1ed15dab" />
 
+<img width="1917" height="940" alt="Screenshot 2025-07-23 231126" src="https://github.com/user-attachments/assets/e49cef04-a7da-488f-bd47-111cf5adc8d7" />
+
 ---
 
 ## 🚀 Features
@@ -46,7 +48,7 @@ Add/Edit/Delete Menu Items
 View all Orders
 Filter menus by restaurant
 
-<img width="1917" height="940" alt="Screenshot 2025-07-23 231126" src="https://github.com/user-attachments/assets/e49cef04-a7da-488f-bd47-111cf5adc8d7" />
+
 
 
 
